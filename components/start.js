@@ -1,10 +1,23 @@
 import { StyleSheet, View, Text, Button, TextInput,ImageBackground,TouchableOpacity, Alert } from 'react-native';
 import { useState } from 'react';
+import { getAuth,signInAnonymously } from 'firebase/auth';
 
-const Screen1 = ({ navigation }) => {
+
+const Start = ({ navigation }) => {
     const [name,setName] = useState("");
-    //const image = {uri:'/Background Image.png'};
     const [color,setColor] = useState("");
+   const auth = getAuth();
+const signInUser = () => {
+    signInAnonymously(auth)
+      .then(result => {//sign in anonym then goto the chat screen, passing in the reqd props...
+        navigation.navigate("chat", {userID: result.user.uid,name:name,color:color });
+        Alert.alert("Signed in Successfully!");
+      })
+      .catch((error) => {
+        Alert.alert("Unable to sign in, try later again.");
+      })
+  }
+
  return (
    <View style={styles.container}>
     <ImageBackground source={require('../assets/Background Image.png')} resizeMode="cover" style={styles.image}>
@@ -18,7 +31,7 @@ const Screen1 = ({ navigation }) => {
         <TouchableOpacity onPress={()=>{setColor('#8A95A5')}} style = {styles.color3}></TouchableOpacity>
         <TouchableOpacity onPress={()=>{setColor('#B9C6AE')}} style = {styles.color4}></TouchableOpacity>
      </View>
-     <TouchableOpacity style={styles.chatButton} title="Start Chatting" onPress={() => navigation.navigate('Screen2',{name:name,color:color})}><Text style={{textAlign:'center',alignContent:'center',color:'#FFFFFF',marginTop:10,fontSize:15}}>Start Chatting</Text></TouchableOpacity>
+     <TouchableOpacity style={styles.chatButton} title="Start Chatting" onPress={(signInUser)}><Text style={{textAlign:'center',alignContent:'center',color:'#FFFFFF',marginTop:10,fontSize:15}}>Start Chatting</Text></TouchableOpacity>
      </View>
      </ImageBackground>
    </View>
@@ -102,4 +115,4 @@ const styles = StyleSheet.create({
  },
 });
 
-export default Screen1;
+export default Start;

@@ -2,41 +2,45 @@ import { StyleSheet, View, Text } from 'react-native';
 import { useEffect,useState } from 'react';
 import { GiftedChat,Bubble } from 'react-native-gifted-chat';
 import { KeyboardAvoidingView,Platform } from 'react-native';
+import { collection, getDocs, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 
 
-  
-
-  
-
-const Screen2 = ({route,navigation}) => {
-    const {name} = route.params;
-    const {color} = route.params;
+  const Chat = ({route,navigation,db}) => {
+    const {name,color,userID} = route.params;
+    
     const [messages,setMessages] = useState([]);
-    const onSend = (newMessages) => {
-      setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages))
+
+    const onSend = (messages) => {
+      addDoc(collection(db, "messages"), messages[0])
     }
+    //-------------------------------------------------------------------------------------------------------------
 
     useEffect(() => {
-      setMessages([
-        {
-          _id: 1,
-          text: "Hello developer",
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: "React Native",
-            avatar: "https://placeimg.com/140/140/any",
-          },
-        },
-        {
-          _id: 2,
-          text: 'This is a system message',
-          createdAt: new Date(),
-          system: true,
-        },
-      ]);
+      //create the query object, getting messages from the db, ordered by date in descending order
+      const qMessages = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+      //use onsnapshot to get the messages data, via the query made above, it returns a data object we can user to 
+      //populate arrays and states below...
+      const unSubChat  =   onSnapshot(qMessages,(chatData)=>{
+        let newMessages = [];
+        //for each document in the database, do stuff, create a new item/message object and push it to the newmessages
+        //array, finally once the foreach is done, pass the newmessages array into the messages state via setmessages...
+        chatData.forEach(doc => {
+          let newItem = {
+            ...doc.data(),
+            createdAt: new Date(doc.data().createdAt.seconds*1000)
+            };
+            newMessages.push(newItem);
+           
+         });
+         setMessages(newMessages);
+      });
+        //used for cleanup to avoid memory leaks...
+      return () => {
+          if (unSubChat) unSubChat();
+      }
+      
     }, []);
-
+//  sets the title to the name value passed thru the props from start screen...
   useEffect(() => {
     navigation.setOptions({ title: name });
   }, []);
@@ -62,8 +66,10 @@ const Screen2 = ({route,navigation}) => {
       onSend={messages => onSend(messages)}
       renderBubble={renderBubble}
       user={{
-        _id: 1
+        _id: userID,
+        name:name
       }}
+      
 />
 { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
 {Platform.OS === "ios"?<KeyboardAvoidingView behavior="padding" />: null}
@@ -74,7 +80,7 @@ const Screen2 = ({route,navigation}) => {
      //<Text>{color}</Text>
    //</View>
  );
-}
+
 
 const styles = StyleSheet.create({
  container: {
@@ -84,5 +90,5 @@ const styles = StyleSheet.create({
    //backgroundColor:`${color}`,
  }
 });
-
-export default Screen2;
+}
+export default Chat;
