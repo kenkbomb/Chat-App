@@ -1,16 +1,16 @@
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Alert } from 'react-native';
 import { useEffect,useState } from 'react';
 import { GiftedChat,Bubble } from 'react-native-gifted-chat';
 import { KeyboardAvoidingView,Platform } from 'react-native';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNetInfo } from '@react-native-community/netinfo';
 import { InputToolbar } from 'react-native-gifted-chat';
 
   const Chat = ({route,navigation,db,isConnected}) => {
     const {name,color,userID} = route.params;
     
     const [messages,setMessages] = useState([]);
+    
 
     const onSend = (messages) => {
       addDoc(collection(db, "messages"), messages[0])
@@ -57,10 +57,11 @@ import { InputToolbar } from 'react-native-gifted-chat';
   useEffect(() => {
     navigation.setOptions({ title: name });
   }, []);
-
+//------------------------------------------------------------------------------------------------
   const loadCachedMessages = async () => {
     const cachedLists = await AsyncStorage.getItem("newMessages") || [];
     setMessages(JSON.parse(cachedLists));
+    Alert.alert("loaded offline message data");
   }
 
   const renderBubble = (props) => {
@@ -78,8 +79,15 @@ import { InputToolbar } from 'react-native-gifted-chat';
   }
 
   const renderInputToolbar = (props) => {
-    if (isConnected) return <InputToolbar {...props} />;
-    else return null;
+   
+   if(isConnected)
+    {
+      return <InputToolbar{...props}></InputToolbar>
+    }
+    if(isConnected==false)
+      {
+        return null;
+      }
    }
 
  return (
@@ -88,7 +96,7 @@ import { InputToolbar } from 'react-native-gifted-chat';
       messages={messages}
       onSend={messages => onSend(messages)}
       renderBubble={renderBubble}
-      InputToolbar={renderInputToolbar}
+      renderInputToolbar={renderInputToolbar}
       user={{
         _id: userID,
         name:name
@@ -99,10 +107,7 @@ import { InputToolbar } from 'react-native-gifted-chat';
 {Platform.OS === "ios"?<KeyboardAvoidingView behavior="padding" />: null}
 </View>
 
-  // <View style={{backgroundColor:color,height:'100%'}}>
-    // <Text>Hello Screen2!</Text>
-     //<Text>{color}</Text>
-   //</View>
+  
  );
 
 
