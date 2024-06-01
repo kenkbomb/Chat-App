@@ -4,7 +4,7 @@ import * as Location from 'expo-location';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { ref,uploadBytes,getDownloadURL } from "firebase/storage";
 
-const CustomActions = ({ wrapperStyle, iconTextStyle,onSend,storage,userID }) => {
+const CustomActions = ({ wrapperStyle, iconTextStyle,onSend,storage,userID,name }) => {
   const actionSheet = useActionSheet();
 
   const onActionPress = () => {
@@ -34,7 +34,10 @@ const CustomActions = ({ wrapperStyle, iconTextStyle,onSend,storage,userID }) =>
   const generateReference = (uri) => {
     const timeStamp = (new Date()).getTime();
     const imageName = uri.split("/")[uri.split("/").length - 1];
-    return `${userID}-${timeStamp}-${imageName}`;
+    const id = name + " " + userID;
+     
+    console.log(name);
+    return `${id}-${timeStamp}-${imageName}`;
   }
 
   const uploadAndSendImage = async (imageURI) => {

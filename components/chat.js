@@ -4,8 +4,6 @@ import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MapView from 'react-native-maps';
-
-
 import CustomActions from './CustomActions';
 
 const Chat = ({ db, route, navigation, isConnected,storage }) => {
@@ -80,7 +78,7 @@ const Chat = ({ db, route, navigation, isConnected,storage }) => {
   }
 
   const renderCustomActions = (props) => {
-    return <CustomActions storage = {storage} {...props} />;
+    return <CustomActions storage = {storage} name = {name} userID={userID} {...props} />;
   };
 
   const renderCustomView = (props) => {
